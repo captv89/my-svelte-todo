@@ -1,5 +1,5 @@
 <script>
-	import Todo from "./Todo.svelte";
+	import Todo from './Todo.svelte';
 </script>
 
 <main>

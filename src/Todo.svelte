@@ -3,38 +3,21 @@
 	import axios from 'axios';
 	import Icon from 'svelte-icons-pack/Icon.svelte';
 	import AiOutlineDelete from 'svelte-icons-pack/ai/AiOutlineDelete';
-	import AiOutlinePlusCircle from 'svelte-icons-pack/ai/AiOutlinePlusCircle';
-	import { set_attributes } from 'svelte/internal';
 
 	let isError = null;
 	let todos = [];
 	let todoItem = '';
 	let todoStatus = false;
-	// deleteIcon
 
 	onMount(async () => {
 		try {
 			const response = await axios.get('http://localhost:1337/api/todos');
 			todos = response.data.data;
-			// console.log(respData);
-			// todos = respData.map((todo) => todo.attributes);
 			console.log(todos);
-			// print all todos ids
-			// for (let i = 0; i < todos.length; i++) {
-			//     console.log(todos[i].id);
-			// }
 		} catch (error) {
 			isError = error;
 		}
 	});
-
-	const handleClick = async (id) => {
-		try {
-			console.log(id);
-		} catch (error) {
-			isError = error;
-		}
-	};
 
 	// function to handle add todo
 	const handleAddTodo = async () => {
@@ -86,6 +69,31 @@
 			const jsonBody = JSON.stringify({
 				data: {
 					item: change,
+					isCompleted: status,
+				},
+			});
+			const response = await axios.put(
+				`http://localhost:1337/api/todos/${id}`,
+				jsonBody,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				}
+			);
+			console.log(response);
+		} catch (error) {
+			isError = error;
+			console.log(error);
+		}
+	};
+
+	// function to handle update todo
+	const handleStatusTodo = async (id, change, status) => {
+		try {
+			const jsonBody = JSON.stringify({
+				data: {
+					item: change,
 					isCompleted: !status,
 				},
 			});
@@ -113,9 +121,9 @@
 	};
 </script>
 
-<div class="bg-white">
+<div class="flex-col max-w-4xl m-auto place-content-center">
 	{#if todos.length > 0}
-		<p class="text-2xl mb-4">Today's Goal</p>
+		<p class="text-2xl mb-4 text-center font-mono">Today's Goal</p>
 	{/if}
 	{#if isError}
 		<p class="text-xl mb-2 text-red-600">{isError}</p>
@@ -146,7 +154,7 @@
 							type="checkbox"
 							class="mr-3"
 							bind:checked={todo.attributes.isCompleted}
-							on:click={handleUpdateTodo(
+							on:click={handleStatusTodo(
 								todo.id,
 								todo.attributes.item,
 								todo.attributes.isCompleted
@@ -154,7 +162,7 @@
 						/>
 						<input
 							class:completed={todo.attributes.isCompleted}
-							class="border-0 bg-transparent w-full"
+							class="border-0 bg-transparent overflow-wrap: normal whitespace-normal  w-full"
 							bind:value={todo.attributes.item}
 							on:change={handleUpdateTodo(
 								todo.id,
@@ -173,7 +181,7 @@
 
 		<!-- Done Items -->
 		{#if todos.filter((todo) => todo.attributes.isCompleted === true).length > 0}
-			<p class="text-2xl mb-4">Done</p>
+			<p class="text-2xl mb-4 text-center font-mono">Done</p>
 		{/if}
 		<ul>
 			{#each todos.filter((todo) => todo.attributes.isCompleted === true) as todo}
@@ -185,7 +193,7 @@
 							type="checkbox"
 							class="mr-3"
 							bind:checked={todo.attributes.isCompleted}
-							on:click={handleUpdateTodo(
+							on:click={handleStatusTodo(
 								todo.id,
 								todo.attributes.item,
 								todo.attributes.isCompleted
@@ -194,13 +202,8 @@
 						<input
 							disabled="true"
 							class:completed={todo.attributes.isCompleted}
-							class="border-0 text-decoration-color: #fff text-decoration-line: line-through w-full"
+							class="border-0 text-decoration-color: #fff overflow-wrap: normal whitespace-normal  text-decoration-line: line-through w-full"
 							bind:value={todo.attributes.item}
-							on:change={handleUpdateTodo(
-								todo.id,
-								todo.attributes.item,
-								todo.attributes.isCompleted
-							)}
 						/>
 					</div>
 					<button
@@ -211,4 +214,5 @@
 			{/each}
 		</ul>
 	{/if}
+	<div class="m-3" />
 </div>
